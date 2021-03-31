@@ -25,21 +25,22 @@ Vagrant.configure("2") do |config|
     h1.vm.hostname = "host1"
     h1.vm.network "private_network", ip: "172.27.11.100"
 
-    h1.vm.provision "shell", inline: <<-SHELL
-      curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.12.0-amd64.deb
-      sudo dpkg -i filebeat-7.12.0-amd64.deb
-    SHELL
-
     h1.vm.provision "file", 
       source: "./filebeat.yml",
       destination: "/tmp/filebeat.yml"
 
     h1.vm.provision "shell", inline: <<-SHELL
       sudo -i
+
+      curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.12.0-amd64.deb
+      dpkg -i filebeat-7.12.0-amd64.deb
+
       chown root:root /tmp/filebeat.yml
       mv /tmp/filebeat.yml /etc/filebeat/filebeat.yml
+
       filebeat modules enable system
       filebeat setup -e
+
       systemctl enable filebeat
       systemctl start filebeat
     SHELL
